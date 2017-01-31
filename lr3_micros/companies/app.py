@@ -1,7 +1,7 @@
 from flask import Flask, request
 from datetime import datetime
 from flask.ext.pymongo import PyMongo, ASCENDING, DESCENDING
-from lr3_micros.companies.utils import send_error, send_response, paginate, Error, cursor_to_list
+from utils import send_error, send_response, paginate, Error, cursor_to_list
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'company_bd'

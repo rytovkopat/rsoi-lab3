@@ -1,7 +1,7 @@
 from hashlib import sha256 as get_hash
 from flask import Flask, request, redirect, session, render_template
 from flask.ext.pymongo import PyMongo
-from lr3_micros.sessions.utils import send_response, send_error, cursor_to_list, generate_token, extract_client
+from utils import send_response, send_error, cursor_to_list, generate_token, extract_client
 from datetime import datetime, timedelta
 from urllib.parse import quote, unquote
 

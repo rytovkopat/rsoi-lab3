@@ -2,7 +2,7 @@ import json
 import requests
 from requests.exceptions import ConnectionError
 from flask import Flask, request, redirect
-from lr3_micros.front.utils import send_error, send_response, clean_hh, proxy_to
+from utils import send_error, send_response, clean_hh, proxy_to
 
 
 app = Flask(__name__)

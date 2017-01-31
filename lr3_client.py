@@ -40,7 +40,7 @@ def send_response(status, obj=None):
 
 query_template = '''
 <html>
-<head><title>LR2 Client</title><meta charset="utf-8"></head>
+<head><title>LR3 Client</title><meta charset="utf-8"></head>
 <body>
   <div>Access Token: {1}</div>
   <h3>Сделать запрос в API</h3><div id="query-form">
@@ -131,7 +131,7 @@ def start_auth():
 
 index_template = '''
 <html>
-<head><title>LR2 Client</title></head>
+<head><title>LR3 Client</title></head>
 <body><a href="/start_auth/">Авторизоваться</a></body>
 </html>
 '''
