@@ -11,6 +11,7 @@ app = Flask(__name__)
 COMPANY_SERVICE_URL = 'http://127.0.0.1:9092/'
 ROUTE_SERVICE_URL = 'http://127.0.0.1:9093/'
 SESSIONS_SERVICE_URL = 'http://127.0.0.1:9091/'
+AGGREGATOR_SERVICE_URL = 'http://127.0.0.1:9094/'
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -41,7 +42,7 @@ def personal_view():
             return send_error(request, 403)
     except ConnectionError as e:
         return send_response(request, {'status': 'Session service is down'})
-
+    
     user = response.json()['data']
     headers = {'X_EMAIL': user['email']}
     try:
@@ -51,7 +52,7 @@ def personal_view():
             user['companies'] = companies['data']
     except ConnectionError as e:
         user['companies'] = {'error': 'Company service is down'}
-
+	
     try:
         response = requests.get(ROUTE_SERVICE_URL + 'my_routes/', headers=headers)
         if response.status_code == 200:
@@ -62,7 +63,7 @@ def personal_view():
 
     return send_response(request, {'status': 'OK', 'data': user})
 
-
+# problem
 @app.route('/route/<route_id>/register/', methods=['POST'])
 def register_me(route_id):
     try:
@@ -71,9 +72,21 @@ def register_me(route_id):
             return send_error(request, 403)
     except ConnectionError:
         return send_response(request, {'status': 'Session service is down'})
+        
+    
 
     user = response.json()['data']
-    headers = {'X_EMAIL': user['email']}
+    print({'USER': user})
+    
+    headers = {}
+    
+    headers.update({
+        'X_EMAIL': user['email'],
+		'X_SECRET': user['password'],
+	})
+	
+    print({'HEADERS': headers})
+	
     try:
         response = requests.post(ROUTE_SERVICE_URL + 'route/%s/register/' % route_id, headers=headers)
         if response.status_code == 200:

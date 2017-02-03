@@ -1,6 +1,6 @@
 from hashlib import sha256 as get_hash
 from flask import Flask, request, redirect, session, render_template
-from flask.ext.pymongo import PyMongo
+from flask_pymongo import PyMongo
 from utils import send_response, send_error, cursor_to_list, generate_token, extract_client
 from datetime import datetime, timedelta
 from urllib.parse import quote, unquote
@@ -88,11 +88,13 @@ def authorize_view():
         if not auth:
             redirect_uri = '/login/?next=%s' % quote(request.url)
             return redirect(redirect_uri)
+       # print('email found\n');
 
         client_id = request.args.get('client_id')
         response_type = request.args.get('response_type')
         if not client_id or response_type.lower() != 'code':
             return send_error(request, 400)
+       # print('client id found\n')
 
         codes = mongo.db.OAuth2Code.find({'client_id': client_id, 'user': auth, 'expires': {'$gt': datetime.now()}})
         if codes.count() > 0:
@@ -101,6 +103,7 @@ def authorize_view():
             mongo.db.OAuth2Code.update_one({'client_id': client_id, 'user': auth}, {'token': token, 'expires': expires})
             redirect_uri = request.form.get('redirect_uri') + '?code=%s' % token
             return redirect(redirect_uri)
+       # print('redirect!\n')
 
         form_values = {
             'client_id': client_id, 'response_type': response_type,
@@ -112,15 +115,18 @@ def authorize_view():
         allow = request.form.get('allow')
         if not allow:
             return redirect('/login/')
+            
+       # print('authentificated!')
 
         token = {
             'token': generate_token(),
-            'expires': datetime.now() + timedelta(seconds=60),
+            'expires': datetime.now() + timedelta(seconds=600),
             'user': session.get('email'),
             'app': request.form.get('client_id'),
         }
         mongo.db.OAuth2Code.insert(token)
         redirect_uri = request.form.get('redirect_uri') + '?code=%s' % token['token']
+       # print('redirect uri created!\n')
         return redirect(redirect_uri)
 
 

@@ -1,7 +1,8 @@
 from flask import Flask, request
 from datetime import datetime
-from flask.ext.pymongo import PyMongo, ASCENDING, DESCENDING
+from flask_pymongo import PyMongo, ASCENDING, DESCENDING
 from utils import send_error, send_response, paginate, Error, cursor_to_list
+import json
 
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'company_bd'
@@ -41,6 +42,8 @@ def get_company_view(abbr):
     if request.method == 'GET':
         company = mongo.db.company.find({'abbreviation': abbr})
         company = cursor_to_list(company)
+        print({'method': 'get', 'company': company})
+        
         if len(company) > 0:
             return send_response(request, company[0])
         else:
@@ -48,14 +51,20 @@ def get_company_view(abbr):
 
     elif request.method == 'PATCH':
         #TODO: check owner
+        json_s = request.get_json()
+        if json_s is None:
+            return send_error(request, 400)
+        json_d = json.loads(json_s)
+        if json_d is None:
+            return send_error(request, 400)
 
-        company = {field: request.json.get(field) for field in COMPANY_FIELDS if field in request.json}
+        company = {field: json_d.get(field) for field in COMPANY_FIELDS if field in json_d}
         if len(company) == 0:
             return send_error(request, 400)
 
         company['updated'] = datetime.now()
         result = mongo.db.company.update_one({'abbreviation': abbr}, {'$set': company})
-        return send_response(request, {'status': 'OK', 'updated': result.matched_count})
+        return send_response(request, {'status': 'OK', 'updated': result.modified_count})
 
     elif request.method == 'DELETE':
         #TODO: check owner
@@ -72,8 +81,14 @@ def create_company_view():
     """
 
     #TODO: create with owner
+    json_s = request.get_json()
+    if json_s is None:
+    	return send_error(request, 400)
+    json_d = json.loads(json_s)
+    if json_d is None:
+    	return send_error(request, 400)
 
-    company = {field: request.json.get(field) for field in COMPANY_FIELDS}
+    company = {field: json_d.get(field) for field in COMPANY_FIELDS}
     found = mongo.db.company.find({'abbreviation': company['abbreviation']}).count()
     if found > 0:
         return send_response(request, {'status': 'Such abbr already exists'})
